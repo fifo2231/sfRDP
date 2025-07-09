@@ -8,47 +8,49 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Step 1: Download the file using CMD (to bypass Cloudflare)
+      # Step 1: Download file (PowerShell with proper error handling)
       - name: Download Essentials
-        shell: cmd
         run: |
-          curl -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" -o Downloads.bat "https://gitlab.com/chamod12/lm_win-10_github_rdpi-fraw/main/Downloads.bat"
-          if exist Downloads.bat (
-              echo File downloaded successfully
-          ) else (
-              echo Failed to download file
-              exit /b 1
-          )
+          $ProgressPreference = 'SilentlyContinue'
+          try {
+              Invoke-WebRequest -Uri "https://gitlab.com/chamod12/lm_win-10_github_rdpi-fraw/main/Downloads.bat" -OutFile "Downloads.bat" -UserAgent "Mozilla/5.0"
+              if (-not (Test-Path "Downloads.bat")) { throw "Download failed" }
+              Write-Output "Download successful"
+          } catch {
+              Write-Error "Download error: $_"
+              exit 1
+          }
 
-      # Step 2: Execute the downloaded batch file
-      - name: Install Essentials
+      # Step 2: Execute files (using CMD with proper syntax)
+      - name: Run Installation
         shell: cmd
         run: |
+          @echo off
           if exist Downloads.bat (
               call Downloads.bat
           ) else (
-              echo Error: Downloads.bat not found
+              echo ERROR: Downloads.bat missing
               exit /b 1
           )
 
-      # Step 3: Connect to LiteManager
       - name: Connect to LiteManager
         shell: cmd
         run: |
+          @echo off
           if exist show.bat (
               call show.bat
           ) else (
-              echo Error: show.bat not found
+              echo ERROR: show.bat missing
               exit /b 1
           )
 
-      # Step 4: Run time counter
       - name: Time Counter
         shell: cmd
         run: |
+          @echo off
           if exist loop.bat (
               call loop.bat
           ) else (
-              echo Error: loop.bat not found
+              echo ERROR: loop.bat missing
               exit /b 1
           )
