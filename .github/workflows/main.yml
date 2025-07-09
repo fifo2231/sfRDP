@@ -8,18 +8,47 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Download & install Essentials
+      # Step 1: Download the file using CMD (to bypass Cloudflare)
+      - name: Download Essentials
+        shell: cmd
         run: |
-          curl -L -A "Mozilla/5.0" -o Downloads.bat "https://gitlab.com/chamod12/lm_win-10_github_rdpi-fraw/main/Downloads.bat"
+          curl -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" -o Downloads.bat "https://gitlab.com/chamod12/lm_win-10_github_rdpi-fraw/main/Downloads.bat"
           if exist Downloads.bat (
-            cmd /c Downloads.bat
+              echo File downloaded successfully
           ) else (
-            echo "Error: Failed to download file!"
-            exit 1
+              echo Failed to download file
+              exit /b 1
           )
 
-      - name: Connect to LiteManager
-        run: cmd /c show.bat
+      # Step 2: Execute the downloaded batch file
+      - name: Install Essentials
+        shell: cmd
+        run: |
+          if exist Downloads.bat (
+              call Downloads.bat
+          ) else (
+              echo Error: Downloads.bat not found
+              exit /b 1
+          )
 
+      # Step 3: Connect to LiteManager
+      - name: Connect to LiteManager
+        shell: cmd
+        run: |
+          if exist show.bat (
+              call show.bat
+          ) else (
+              echo Error: show.bat not found
+              exit /b 1
+          )
+
+      # Step 4: Run time counter
       - name: Time Counter
-        run: cmd /c loop.bat
+        shell: cmd
+        run: |
+          if exist loop.bat (
+              call loop.bat
+          ) else (
+              echo Error: loop.bat not found
+              exit /b 1
+          )
